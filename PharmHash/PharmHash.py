@@ -1,11 +1,14 @@
-import numpy as np
-from math import sqrt
+from __future__ import annotations
 
+from math import sqrt
+from typing import Callable, Dict, List, Tuple
+
+import numpy as np
 
 
 class cached_property(object):
-    def __init__(self, func):
-        self.func = func
+    def __init__(self, func: Callable) -> None:
+        self.func: Callable = func
 
     def __get__(self, instance, cls=None):
         result = instance.__dict__[self.func.__name__] = self.func(instance)
@@ -19,10 +22,17 @@ class Pharmacophore:
     To change accuracy you should
     """
     # Assign 'mass' to every type of active centers: Negative, Positive, Donor, Acceptor, Hydrophobic and aromatic
-    w = {'N': sqrt(2), 'P': sqrt(3), 'D': sqrt(5), 'A': sqrt(7), 'H': sqrt(11), 'a': sqrt(13)}
+    w: Dict[str, float] = {'N': sqrt(2), 'P': sqrt(3), 'D': sqrt(5), 'A': sqrt(7), 'H': sqrt(11), 'a': sqrt(13)}
     # All permutations with repetitions to find only right-hand vectors
-    nums = ((-1, -1, -1), (-1, -1, 1), (-1, 1, -1), (-1, 1, 1), (1, -1, -1), (1, -1, 1), (1, 1, -1), (1, 1, 1))
-
+    nums: Tuple[Tuple[int, int, int]] = (
+        (-1, -1, -1), 
+        (-1, -1, 1), 
+        (-1, 1, -1), 
+        (-1, 1, 1), 
+        (1, -1, -1), 
+        (1, -1, 1), 
+        (1, 1, -1), 
+        (1, 1, 1))
 
     def __init__(self, name, ph_coords, rmsd):
         """
@@ -32,7 +42,7 @@ class Pharmacophore:
         """
         self.name = name
         self.nodes = [i[0] for i in ph_coords]
-        self.coords = np.array([list(i[1]) for i in ph_coords])
+        self.coords: ndarray = np.array([list(i[1]) for i in ph_coords])
         self.rmsd = rmsd
 
 
@@ -71,20 +81,19 @@ class Pharmacophore:
 
         positions = []
         for num in Pharmacophore.nums:
-            b = np.dot(eigenvectors, np.diag(num))            # multiply by vectors from 'num'
-            V = np.dot(b[:, 0], np.cross(b[:, 1], b[:, 2]))   # and calculate triple products = e_x dot (e_y cross e_z)
-            if V > 0:                                         # only right-handed coordinate systems must be saved
-                positions.append(b)
+            b = np.dot(eigenvectors, np.diag(num))  # multiply by vectors from 'num'
+            if np.linalg.det(b) > 0:                # and calculate determinant of matrix
+                positions.append(b)                 # only right-handed coordinate systems must be saved
 
         return positions
 
 
-    def rounded(n, m):
+    def rounded(n: List, m: float) -> float:
         """
         Enter vector or matrix and get rounded elements accurate to 'm'
         """
         if  m <= 0:
-            raise ValueError
+            raise ValueError('Accuracy must be positive')
         cond = (n%m >= m/2)         # if less than half of rounding step, then round to little number
         return n - n%m + m*(cond)   # else to big number
         
@@ -92,7 +101,7 @@ class Pharmacophore:
     def hash(self, acc):
         """Function returns tuple of coordinates and mark of every node in pharmacophore
         :param acc: - accuracy of rounding
-        """     
+        """
         # multiply every coordinates by position matrix to turn it
         # and round with 'm'-accuracy
         rounded_coordinates = [Pharmacophore.rounded(self.coords @ pos, acc) for pos in self.positions]
@@ -106,7 +115,7 @@ class Pharmacophore:
         return sorted(list(map(tuple, tuples)))[0]
 
 
-    def is_match(self, phrm, acc):
+    def is_match(self, phrm: Pharmacophore, acc) -> bool:
         if not isinstance(phrm, Pharmacophore):
             raise TypeError(f'{phrm} must be Pharmacophore object')
         return phrm.hash(acc) == self.hash(acc)

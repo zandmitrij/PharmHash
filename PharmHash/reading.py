@@ -21,6 +21,7 @@ def load_from_coords(fname):
                 feature_coords.append((label, coords))
     return dic
 
+
 def load_rmsd(fname):
     """
     Reads RMSD from .rms file
