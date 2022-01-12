@@ -1,4 +1,7 @@
-def load_from_coords(fname):
+from typing import Any, Dict, List, Tuple
+
+
+def load_from_coords(fname: str) -> Dict[str, Any]:
     """
     Reads pharmacophore from  coords file.
     :param fname: coords-file name
@@ -6,8 +9,8 @@ def load_from_coords(fname):
     """
     dic = {}
 
-    with open (fname) as f:
-        feature_coords = []
+    with open(fname, 'r') as f:
+        feature_coords: List[Tuple[str, Tuple[float, float, float]]] = []
         for line in f:       
             line = line.strip().split()
             if not line:   # if line has no symbols -> add pharmacophore to our dict
@@ -17,12 +20,12 @@ def load_from_coords(fname):
                 name = line[0]  
             else:    
                 label, *coords = line
-                coords = tuple(map(float, coords))
+                coords: Tuple[float, float, float] = tuple(map(float, coords))
                 feature_coords.append((label, coords))
     return dic
 
 
-def load_rmsd(fname):
+def load_rmsd(fname: str) -> Dict[str, float]:
     """
     Reads RMSD from .rms file
     :param fname: .rms file
@@ -34,3 +37,4 @@ def load_rmsd(fname):
             line  = line.strip().split()
             dic[line[0]+'_'+line[1]] = float(line[2])
     return dic
+

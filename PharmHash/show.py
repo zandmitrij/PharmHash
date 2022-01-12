@@ -1,9 +1,13 @@
-import numpy as np
+import random
+from typing import Dict
+
 import matplotlib.pyplot as plt
+import numpy as np
+
+from .pharmhash import Pharmacophore
 
 
-
-def show_pharmacophore(obj, hash=False):
+def show_pharmacophore(obj: Pharmacophore, hash: bool = False) -> None:
     """
     Demonstration of graph in 3D.
 
@@ -24,7 +28,7 @@ def show_pharmacophore(obj, hash=False):
         coords = obj.coords
 
     # Assign special color to every type of centers
-    colors = {"A": "red", "a": "orange", "D": "plum", "H": "cyan", "P": "olive", "N": "lime"}
+    COLORS: Dict[str, str] = {"A": "red", "a": "orange", "D": "plum", "H": "cyan", "P": "olive", "N": "lime"}
 
     fig = plt.figure(figsize=(30, 24))
     ax = fig.add_subplot(111, projection='3d')
@@ -35,19 +39,40 @@ def show_pharmacophore(obj, hash=False):
     zs = coords[:, 2]
 
     for i in range(len(xs)):
-        ax.scatter(xs[i], ys[i], zs[i], c=colors[nodes[i]], marker='o', s=300)
+        ax.scatter(xs[i], ys[i], zs[i], c=COLORS[nodes[i]], marker='o', s=300)
 
     # Labels on nodes:
     for i in range(len(xs)):
-        ax.text(xs[i]+rnd.random()*0.2, ys[i]+rnd.random()*0.2, zs[i]+rnd.random()*0.2, nodes[i], fontsize=20)
+        ax.text(
+            xs[i]+random.random() * 0.2, 
+            ys[i]+random.random() * 0.2, 
+            zs[i]+random.random() * 0.2, 
+            nodes[i],
+            fontsize=20
+        )
 
     ax.set_xlabel('X Label')
     ax.set_ylabel('Y Label')
     ax.set_zlabel('Z Label')
     
     # Make simple, bare axis lines through space:
-    ax.plot((min(xs) - 1, max(xs) + 1), (0, 0), (0, 0), 'k')
-    ax.plot((0, 0), (min(ys) - 1, max(ys) + 1), (0, 0), 'k')
-    ax.plot((0, 0), (0, 0), (min(zs) - 1, max(zs) + 1), 'k')
+    ax.plot(
+        (min(xs) - 1, max(xs) + 1),
+        (0, 0),
+        (0, 0), 
+        'k'
+    )
+    ax.plot(
+        (0, 0),
+        (min(ys) - 1, max(ys) + 1),
+        (0, 0),
+        'k'
+    )
+    ax.plot(
+        (0, 0),
+        (0, 0), 
+        (min(zs) - 1, max(zs) + 1),
+        'k'
+    )
 
     plt.show()
